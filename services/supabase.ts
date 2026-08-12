@@ -2,6 +2,7 @@ import 'react-native-url-polyfill/auto';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
+import { AppState } from 'react-native';
 
 // Development Supabase project only — see .env.example. Production
 // configuration is a separate project, wired up in the Production
@@ -41,3 +42,15 @@ export const supabase = createClient(
     },
   },
 );
+
+// supabase-js's token auto-refresh runs on a timer that doesn't know the
+// app is backgrounded — this pauses it while backgrounded and resumes (and
+// immediately re-checks the token) on foreground, per Supabase's own
+// guidance for React Native.
+AppState.addEventListener('change', (state) => {
+  if (state === 'active') {
+    supabase.auth.startAutoRefresh();
+  } else {
+    supabase.auth.stopAutoRefresh();
+  }
+});

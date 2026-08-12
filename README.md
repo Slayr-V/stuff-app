@@ -59,20 +59,38 @@ by Row Level Security. Restart `expo start` after editing `.env`.
 ## Supabase
 
 `services/supabase.ts` creates the Supabase client (`@supabase/supabase-js`
-+ AsyncStorage for session persistence). If `EXPO_PUBLIC_SUPABASE_URL` /
-`_ANON_KEY` aren't set, the client still initializes (against a placeholder
-URL) rather than crashing the app — `isSupabaseConfigured` tells callers
-whether it's actually usable.
++ AsyncStorage for session persistence, plus `AppState`-driven token
+auto-refresh so it pauses while backgrounded). If
+`EXPO_PUBLIC_SUPABASE_URL` / `_ANON_KEY` aren't set, the client still
+initializes (against a placeholder URL) rather than crashing the app —
+`isSupabaseConfigured` tells callers whether it's actually usable.
 
-`hooks/useSupabaseConnection.ts` pings the project's public Auth health
-endpoint to confirm the app is actually reaching your Supabase project —
-this works ahead of any schema or authenticated call existing. Its result
-is surfaced on the **Profile** tab as a small dev-only status card
-(connected / not configured / error), which goes away once Profile shows
-a real signed-in account.
+`hooks/useSupabaseConnection.ts` pings the project's Auth health endpoint
+(with the required `apikey` header) to confirm the app is actually
+reaching your Supabase project. It's no longer surfaced in the UI now
+that real authentication proves connectivity end-to-end, but the hook
+still exists as a standalone diagnostic if needed.
 
-No schema, no auth flows, and no Row Level Security policies exist yet —
-those are the Authentication and Initial Database Schema stages.
+No database schema or Row Level Security policies exist yet — that's the
+Initial Database Schema stage. Auth works without them (Supabase's
+built-in `auth.users` table needs no app schema).
+
+## Authentication
+
+Real Supabase email/password auth — not mocked:
+
+- `services/auth.ts` — thin wrappers over `supabase.auth`: `signUpWithEmail`,
+  `signInWithEmail`, `signOut`.
+- `hooks/useAuth.tsx` — `AuthProvider` (wraps the whole app in
+  `app/_layout.tsx`) + `useAuth()`, exposing the current `Session | null`
+  and an `initializing` flag for the first session read.
+- **Profile** tab is the real UI: a sign-in/sign-up form (toggleable) when
+  signed out, account email + sign-out when signed in.
+
+Not yet done: Sign in with Apple / Google (need a Development Build —
+native modules Expo Go can't run), password reset, and route-gating other
+tabs by auth state (nothing to gate yet — that lands with real per-user
+data in the Database Schema / Core Stuff Library stages).
 
 ## Navigation
 
@@ -103,9 +121,9 @@ Import from the barrel: `import { AppText, ScreenContainer } from '@/components'
 
 Every screen (`app/(tabs)/*`, `app/import.tsx`) is built on these — there
 are no raw `View`/`Text` screen roots or hardcoded colors left in `app/`.
-`Card` and `LoadingIndicator` are now proven in the Profile tab's Supabase
-status card. `Input` still has no real call site (no form exists yet); it
-gets one in the Authentication stage.
+`Input` and `LoadingIndicator` are proven in the Profile tab's real
+sign-in form. `Card` has no call site right now — it'll get one once
+there's a list to put it in (Boards, Search results).
 
 No dark mode yet — not asked for — but because screens read colors from
 `theme` rather than hardcoding hex values, adding it later is a token
