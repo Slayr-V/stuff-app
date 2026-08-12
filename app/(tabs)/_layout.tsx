@@ -1,67 +1,77 @@
 import { Tabs, useRouter } from 'expo-router';
+import { StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Icon, theme } from '@/components';
-import { APP_NAME } from '@/constants/app';
+import { Fab, Icon, Logo, theme } from '@/components';
 
-// Primary navigation: Finds | Boards | + | Search | Profile.
+// Primary navigation: Finds | Boards | Search | Profile, plus a floating
+// "+" action for Import (not a tab item — see Fab below).
 //
-// The "+" tab is an action, not a screen — see its `listeners` below.
+// Import used to be a 5th tab whose press was intercepted
+// (listeners.tabPress + preventDefault) to open a modal instead of
+// actually navigating to its own screen. That was both a design mismatch
+// with the reference UI (which uses a real floating action button) and a
+// reliability problem — a real FAB with its own onPress is strictly
+// simpler and doesn't depend on canceling the tab navigator's default
+// behavior working correctly on every platform/version.
 export default function TabsLayout() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: true,
-        tabBarActiveTintColor: theme.colors.text,
-        tabBarInactiveTintColor: theme.colors.textMuted,
-      }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: APP_NAME,
-          tabBarLabel: 'Finds',
-          tabBarIcon: ({ color, size }) => <Icon name="albums-outline" size={size} color={color} />,
+    <View style={styles.container}>
+      <Tabs
+        screenOptions={{
+          headerShown: true,
+          headerTitleAlign: 'left',
+          tabBarActiveTintColor: theme.colors.accent,
+          tabBarInactiveTintColor: theme.colors.textMuted,
         }}
+      >
+        <Tabs.Screen
+          name="index"
+          options={{
+            headerTitle: () => <Logo height={24} style={styles.headerLogo} />,
+            tabBarLabel: 'Finds',
+            tabBarIcon: ({ color, size }) => <Icon name="albums-outline" size={size} color={color} />,
+          }}
+        />
+        <Tabs.Screen
+          name="boards"
+          options={{
+            title: 'Boards',
+            tabBarIcon: ({ color, size }) => <Icon name="bookmark-outline" size={size} color={color} />,
+          }}
+        />
+        <Tabs.Screen
+          name="search"
+          options={{
+            title: 'Search',
+            tabBarIcon: ({ color, size }) => <Icon name="search-outline" size={size} color={color} />,
+          }}
+        />
+        <Tabs.Screen
+          name="profile"
+          options={{
+            title: 'Profile',
+            tabBarIcon: ({ color, size }) => <Icon name="person-outline" size={size} color={color} />,
+          }}
+        />
+      </Tabs>
+      <Fab
+        accessibilityLabel="Import a Find"
+        onPress={() => router.push('/import')}
+        style={{ right: theme.spacing.lg, bottom: insets.bottom + 78 }}
       />
-      <Tabs.Screen
-        name="boards"
-        options={{
-          title: 'Boards',
-          tabBarIcon: ({ color, size }) => <Icon name="bookmark-outline" size={size} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="import"
-        options={{
-          title: 'Import',
-          tabBarIcon: ({ color, size }) => <Icon name="add-circle" size={size + 10} color={color} />,
-        }}
-        listeners={{
-          tabPress: (event) => {
-            // This tab never navigates to its own screen. Intercept the
-            // press and present the real import flow (app/import.tsx) as a
-            // modal over the tabs instead.
-            event.preventDefault();
-            router.push('/import');
-          },
-        }}
-      />
-      <Tabs.Screen
-        name="search"
-        options={{
-          title: 'Search',
-          tabBarIcon: ({ color, size }) => <Icon name="search-outline" size={size} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: 'Profile',
-          tabBarIcon: ({ color, size }) => <Icon name="person-outline" size={size} color={color} />,
-        }}
-      />
-    </Tabs>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  headerLogo: {
+    marginLeft: theme.spacing.md,
+  },
+});

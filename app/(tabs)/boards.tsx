@@ -2,6 +2,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { router } from 'expo-router';
 import { useCallback } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { AppButton, AppText, Card, LoadingIndicator, ScreenContainer, theme } from '@/components';
 import { useAuth } from '@/hooks/useAuth';
@@ -68,11 +69,17 @@ function BoardsList() {
   if (boards.length === 0) {
     return (
       <ScreenContainer contentContainerStyle={styles.center}>
-        <AppText variant="title">No Boards yet</AppText>
-        <AppText variant="subtitle" style={styles.centerText}>
-          Create a Board to organise your saved products.
-        </AppText>
-        <AppButton title="Create Board" onPress={() => router.push('/boards/new')} style={styles.signInButton} />
+        <Animated.View entering={FadeInDown.duration(400)}>
+          <Card variant="feature" style={styles.featureCard}>
+            <AppText variant="heading" style={styles.centerText}>
+              Organise what{'\n'}you find
+            </AppText>
+            <AppText variant="subtitle" style={styles.centerText}>
+              Create a Board to group your saved products.
+            </AppText>
+            <AppButton title="Create Board" onPress={() => router.push('/boards/new')} style={styles.featureButton} />
+          </Card>
+        </Animated.View>
       </ScreenContainer>
     );
   }
@@ -81,7 +88,7 @@ function BoardsList() {
     <ScreenContainer contentContainerStyle={styles.listContainer}>
       <View style={styles.header}>
         <AppText variant="heading">Boards</AppText>
-        <AppButton title="New Board" variant="secondary" onPress={() => router.push('/boards/new')} />
+        <AppButton title="New" variant="secondary" onPress={() => router.push('/boards/new')} />
       </View>
       <FlatList
         data={boards}
@@ -89,22 +96,24 @@ function BoardsList() {
         numColumns={2}
         columnWrapperStyle={styles.row}
         contentContainerStyle={styles.grid}
-        renderItem={({ item }) => <BoardCard board={item} />}
+        renderItem={({ item, index }) => <BoardCard board={item} index={index} />}
       />
     </ScreenContainer>
   );
 }
 
-function BoardCard({ board }: { board: Board }) {
+function BoardCard({ board, index }: { board: Board; index: number }) {
   return (
-    <Pressable style={styles.cardWrapper} onPress={() => router.push(`/boards/${board.id}`)}>
-      <Card style={styles.card}>
-        <View style={styles.cardCover} />
-        <AppText variant="label" numberOfLines={1}>
-          {board.name}
-        </AppText>
-      </Card>
-    </Pressable>
+    <Animated.View style={styles.cardWrapper} entering={FadeInDown.duration(350).delay(Math.min(index, 8) * 40)}>
+      <Pressable onPress={() => router.push(`/boards/${board.id}`)}>
+        <Card style={styles.card}>
+          <View style={styles.cardCover} />
+          <AppText variant="label" numberOfLines={1}>
+            {board.name}
+          </AppText>
+        </Card>
+      </Pressable>
+    </Animated.View>
   );
 }
 
@@ -118,6 +127,15 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   signInButton: {
+    marginTop: theme.spacing.sm,
+  },
+  featureCard: {
+    alignItems: 'center',
+    gap: theme.spacing.sm,
+    paddingVertical: theme.spacing.xl,
+    paddingHorizontal: theme.spacing.lg,
+  },
+  featureButton: {
     marginTop: theme.spacing.sm,
   },
   listContainer: {

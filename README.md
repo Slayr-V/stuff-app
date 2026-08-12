@@ -161,39 +161,71 @@ deliberately narrower than the full spec right now:
 
 ## Navigation
 
-Primary structure is a tab navigator: **Finds | Boards | + | Search | Profile**.
+Primary structure is a tab navigator: **Finds | Boards | Search | Profile**,
+plus a floating **+** action for Import.
 
 - `app/(tabs)/` — Finds, Boards and Profile are real; Search is still a
   placeholder empty state.
 - Finds tab lists real `finds` (`app/finds/[id]/index.tsx` for detail +
   products) — see Import & AI product extraction above for how they get
   there.
-- The **+** tab is an action, not a screen: it's intercepted in
-  `app/(tabs)/_layout.tsx` and pushes `app/import.tsx`, presented as a
-  modal over the tabs — the real import flow (see above).
+- **Import is a floating action button, not a tab item.** It used to be a
+  5th tab whose press was intercepted (`listeners.tabPress` +
+  `preventDefault()`) to open `app/import.tsx` as a modal instead of
+  actually navigating there. That pattern turned out to be exactly the
+  kind of thing worth not doing: it was both a mismatch with the
+  reference UI (a real FAB) and a reliability problem — event
+  interception depending on `preventDefault()` actually working is a
+  weaker foundation than a button whose `onPress` just directly calls
+  `router.push('/import')`. Replaced with `components/Fab.tsx`,
+  overlaid on `app/(tabs)/_layout.tsx`.
 
 ## Design system
 
-`components/` holds the UI foundations every screen is built on:
+`components/` holds the UI foundations every screen is built on. Visual
+direction follows the reference UI provided (ReciMe): a warm neutral
+palette, a serif display face for headings against a plain sans body, a
+single blue accent for interactive elements, and a floating action
+button for the primary create action.
 
 | Component         | Purpose                                              |
 | ------------------ | ----------------------------------------------------- |
-| `theme`             | Design tokens: `colors`, `spacing`, `radii`, `typography` |
-| `AppText`           | Typography — `variant`: heading/title/body/label/subtitle/caption |
-| `AppButton`         | Buttons — `variant`: primary/secondary/ghost, plus `loading`/`disabled` |
+| `theme`             | Design tokens: `colors`, `spacing`, `radii`, `fontFamily`, `typography` |
+| `AppText`           | Typography — `variant`: heading/title (serif) / body/label/subtitle/caption (sans) |
+| `AppButton`         | Buttons — `variant`: primary/secondary/ghost, `loading`/`disabled`, animated press (Reanimated spring) |
+| `Fab`               | Floating action button — animated press, positioned by the caller |
 | `Input`             | Labeled text input with an `error` state              |
-| `Card`              | Generic surface container                             |
+| `Card`              | Surface container — `variant`: `surface` (default) or `feature` (warm cream, for empty states) |
 | `Icon`              | Wraps `@expo/vector-icons` so screens don't depend on that package directly |
 | `LoadingIndicator`  | Spinner with an optional label                        |
+| `Logo`              | The real Stuff wordmark (`assets/brand/stuff-logo.jpg`), used in the Finds tab header |
 | `ScreenContainer`   | Safe-area-aware screen root with consistent background/padding |
 
 Import from the barrel: `import { AppText, ScreenContainer } from '@/components'`.
 
-Every screen (`app/(tabs)/*`, `app/import.tsx`, `app/boards/*`,
-`app/finds/*`) is built on these — there are no raw `View`/`Text` screen
-roots or hardcoded colors left in `app/`. All seven components now have
-real call sites: `Card` (Boards grid, Find products), `Input` (sign-in,
-Board name, Import form), `LoadingIndicator` (every async screen).
+Every screen is built on these — there are no raw `View`/`Text` screen
+roots or hardcoded colors left in `app/`.
+
+**Fonts**: Playfair Display (serif, headings only) loaded via
+`@expo-google-fonts/playfair-display`, imported from its individual
+weight submodules (`.../600SemiBold`, `.../700Bold`) rather than the
+package barrel — the barrel re-exports all 12 weights, which would bundle
+~2.2MB of font files for the 2 actually used. `app/_layout.tsx` gates
+rendering on `useFonts()` and keeps the native splash screen up
+(`expo-splash-screen`) until they're ready, so there's no flash of
+system-font text before the display face swaps in.
+
+**Animation**: list items and empty-state feature cards fade/slide in on
+mount (Reanimated `FadeInDown`, staggered by index for lists); buttons
+and the FAB scale down on press (`withSpring`). All real Reanimated
+usage, not `Animated` API from core React Native.
+
+**Logo**: `assets/brand/stuff-logo.jpg` is the real wordmark, wired as
+the app icon, splash screen, and web favicon in `app.json`, and shown in
+the Finds tab header via the `Logo` component. It's 736×736 — below
+Apple's 1024×1024 recommendation for the App Store icon specifically;
+fine for development, worth a higher-res export before Store Release
+Preparation.
 
 No dark mode yet — not asked for — but because screens read colors from
 `theme` rather than hardcoding hex values, adding it later is a token
@@ -230,7 +262,4 @@ in `tsconfig.json` and `metro.config.js`.
 
 ### App icons
 
-No custom app icon / splash / favicon is configured yet — `app.json`
-intentionally omits those fields and Expo falls back to its defaults.
-Real branded assets are added when the app has an actual design, in the
-Design System or Store Release Preparation stage.
+Real now — see "Logo" under Design system above.

@@ -6,7 +6,19 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
-    "plugins": ["expo-router"],
+    "icon": "./assets/brand/stuff-logo.jpg",
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/brand/stuff-logo.jpg",
+          "imageWidth": 220,
+          "resizeMode": "contain",
+          "backgroundColor": "#FFFFFF"
+        }
+      ]
+    ],
     "experiments": {
       "typedRoutes": true
     },
@@ -16,6 +28,8 @@
     "android": {
       "predictiveBackGestureEnabled": false
     },
-    "web": {}
+    "web": {
+      "favicon": "./assets/brand/stuff-logo.jpg"
+    }
   }
 }

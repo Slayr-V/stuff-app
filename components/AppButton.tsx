@@ -1,4 +1,5 @@
 import { ActivityIndicator, Pressable, type PressableProps, StyleSheet, type ViewStyle } from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 
 import { AppText } from './AppText';
 import { theme } from './theme';
@@ -16,28 +17,34 @@ export type AppButtonProps = Omit<PressableProps, 'style'> & {
 // own bare-bones <Button>, which this replaces everywhere in the app.
 export function AppButton({ title, variant = 'primary', loading = false, disabled, style, ...props }: AppButtonProps) {
   const isDisabled = disabled || loading;
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
 
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityState={{ disabled: isDisabled }}
       disabled={isDisabled}
-      style={({ pressed }) => [
-        styles.base,
-        styles[variant],
-        isDisabled && styles.disabled,
-        pressed && !isDisabled && styles.pressed,
-        style,
-      ]}
+      onPressIn={() => {
+        if (!isDisabled) scale.value = withSpring(0.96, { damping: 15, stiffness: 400 });
+      }}
+      onPressOut={() => {
+        scale.value = withSpring(1, { damping: 15, stiffness: 400 });
+      }}
       {...props}
     >
-      {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? theme.colors.primaryText : theme.colors.primary} />
-      ) : (
-        <AppText variant="label" style={variant === 'primary' ? styles.primaryText : styles.defaultText}>
-          {title}
-        </AppText>
-      )}
+      <Animated.View style={[styles.base, styles[variant], isDisabled && styles.disabled, animatedStyle, style]}>
+        {loading ? (
+          <ActivityIndicator color={variant === 'primary' ? theme.colors.primaryText : theme.colors.primary} />
+        ) : (
+          <AppText variant="label" style={variant === 'primary' ? styles.primaryText : styles.defaultText}>
+            {title}
+          </AppText>
+        )}
+      </Animated.View>
     </Pressable>
   );
 }
@@ -64,9 +71,6 @@ const styles = StyleSheet.create({
   },
   disabled: {
     backgroundColor: theme.colors.disabled,
-  },
-  pressed: {
-    opacity: 0.85,
   },
   primaryText: {
     color: theme.colors.primaryText,

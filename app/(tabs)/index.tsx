@@ -2,9 +2,9 @@ import { useFocusEffect } from '@react-navigation/native';
 import { router } from 'expo-router';
 import { useCallback } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { AppButton, AppText, Card, LoadingIndicator, ScreenContainer, theme } from '@/components';
-import { APP_NAME } from '@/constants/app';
 import { useAuth } from '@/hooks/useAuth';
 import { useFinds } from '@/hooks/useFinds';
 import type { Find } from '@/types/database';
@@ -25,9 +25,9 @@ export default function FindsScreen() {
       <ScreenContainer contentContainerStyle={styles.center}>
         <AppText variant="title">No Finds yet</AppText>
         <AppText variant="subtitle" style={styles.centerText}>
-          Share a post from Instagram, TikTok, YouTube or the web to {APP_NAME}, or tap the + button below to import
-          one manually.
+          Sign in to start saving products from the posts you find.
         </AppText>
+        <AppButton title="Go to Profile" onPress={() => router.push('/profile')} style={styles.actionButton} />
       </ScreenContainer>
     );
   }
@@ -67,11 +67,16 @@ function FindsList() {
   if (finds.length === 0) {
     return (
       <ScreenContainer contentContainerStyle={styles.center}>
-        <AppText variant="title">No Finds yet</AppText>
-        <AppText variant="subtitle" style={styles.centerText}>
-          Tap the + button below to import your first one.
-        </AppText>
-        <AppButton title="Import" onPress={() => router.push('/import')} style={styles.actionButton} />
+        <Animated.View entering={FadeInDown.duration(400)}>
+          <Card variant="feature" style={styles.featureCard}>
+            <AppText variant="heading" style={styles.centerText}>
+              Let&apos;s find{'\n'}something good
+            </AppText>
+            <AppText variant="subtitle" style={styles.centerText}>
+              Tap the + button below to import your first Find.
+            </AppText>
+          </Card>
+        </Animated.View>
       </ScreenContainer>
     );
   }
@@ -82,26 +87,28 @@ function FindsList() {
         data={finds}
         keyExtractor={(find) => find.id}
         contentContainerStyle={styles.list}
-        renderItem={({ item }) => <FindCard find={item} />}
+        renderItem={({ item, index }) => <FindCard find={item} index={index} />}
       />
     </ScreenContainer>
   );
 }
 
-function FindCard({ find }: { find: Find }) {
+function FindCard({ find, index }: { find: Find; index: number }) {
   return (
-    <Pressable onPress={() => router.push(`/finds/${find.id}`)}>
-      <Card style={styles.card}>
-        <View style={styles.cardHeader}>
-          <AppText variant="caption" style={styles.platform}>
-            {find.platform.toUpperCase()}
+    <Animated.View entering={FadeInDown.duration(350).delay(Math.min(index, 8) * 40)}>
+      <Pressable onPress={() => router.push(`/finds/${find.id}`)}>
+        <Card style={styles.card}>
+          <View style={styles.cardHeader}>
+            <AppText variant="caption" style={styles.platform}>
+              {find.platform.toUpperCase()}
+            </AppText>
+          </View>
+          <AppText variant="body" numberOfLines={2}>
+            {find.caption || 'No caption'}
           </AppText>
-        </View>
-        <AppText variant="body" numberOfLines={2}>
-          {find.caption || 'No caption'}
-        </AppText>
-      </Card>
-    </Pressable>
+        </Card>
+      </Pressable>
+    </Animated.View>
   );
 }
 
@@ -116,6 +123,12 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     marginTop: theme.spacing.sm,
+  },
+  featureCard: {
+    alignItems: 'center',
+    gap: theme.spacing.sm,
+    paddingVertical: theme.spacing.xl,
+    paddingHorizontal: theme.spacing.lg,
   },
   listContainer: {
     flexGrow: 1,
