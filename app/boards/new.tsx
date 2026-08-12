@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet } from 'react-native';
 
-import { AppButton, AppText, Input, ScreenContainer, theme } from '@/components';
+import { AppButton, AppText, BottomSheet, Input, theme } from '@/components';
 import { useAuth } from '@/hooks/useAuth';
 import { createBoard } from '@/services/boards';
 
@@ -34,12 +34,11 @@ export default function NewBoardScreen() {
   }
 
   return (
-    <ScreenContainer contentContainerStyle={styles.container}>
+    <BottomSheet title="New Board">
       <Input
-        label="Board name"
         value={name}
         onChangeText={setName}
-        placeholder="e.g. Kitchen"
+        placeholder="Board name"
         autoFocus
         autoCapitalize="words"
         returnKeyType="done"
@@ -51,16 +50,11 @@ export default function NewBoardScreen() {
         </AppText>
       ) : null}
       <AppButton title="Create" onPress={handleCreate} loading={submitting} disabled={!name.trim()} />
-    </ScreenContainer>
+    </BottomSheet>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    gap: theme.spacing.md,
-    justifyContent: 'center',
-    flexGrow: 1,
-  },
   error: {
     color: theme.colors.danger,
   },

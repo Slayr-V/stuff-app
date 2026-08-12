@@ -1,35 +1,18 @@
-import { StyleSheet, View, type ViewProps } from 'react-native';
+import { View, type ViewStyle, type ViewProps } from 'react-native';
 
 import { theme } from './theme';
 
 export type CardProps = ViewProps & {
-  variant?: 'surface' | 'feature';
+  backgroundColor?: string;
+  radius?: number;
 };
 
-// Generic surface container — a Board tile, a product result, a settings
-// row. "feature" is the warm cream card used for empty states / highlight
-// moments (see the reference UI's empty-state card); "surface" (default)
-// is the plain neutral card used everywhere else.
-export function Card({ style, variant = 'surface', ...props }: CardProps) {
-  return <View style={[styles.card, variant === 'feature' ? styles.feature : styles.surface, style]} {...props} />;
+// Flat surface container — grouped list panel, stat card, sheet row.
+// Per the design: "Cards have no borders — separation comes from the
+// grey tile fill against white." No default shadow either; specific
+// elements that do float above content (nav bar, FAB, toast, save-flag
+// chips) use theme.shadows explicitly where they're built.
+export function Card({ style, backgroundColor = theme.colors.surface, radius = theme.radii.thumb, ...props }: CardProps) {
+  const base: ViewStyle = { backgroundColor, borderRadius: radius, padding: theme.spacing.md };
+  return <View style={[base, style]} {...props} />;
 }
-
-const styles = StyleSheet.create({
-  card: {
-    borderRadius: theme.radii.lg,
-    padding: theme.spacing.md,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  surface: {
-    backgroundColor: theme.colors.surface,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: theme.colors.border,
-  },
-  feature: {
-    backgroundColor: theme.colors.surfaceAlt,
-  },
-});

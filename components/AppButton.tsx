@@ -5,17 +5,31 @@ import { AppText } from './AppText';
 import { theme } from './theme';
 
 type Variant = 'primary' | 'secondary' | 'ghost';
+type Size = 'large' | 'small';
 
 export type AppButtonProps = Omit<PressableProps, 'style'> & {
   title: string;
   variant?: Variant;
+  size?: Size;
   loading?: boolean;
   style?: ViewStyle;
 };
 
 // Named AppButton (not Button) to avoid any confusion with React Native's
 // own bare-bones <Button>, which this replaces everywhere in the app.
-export function AppButton({ title, variant = 'primary', loading = false, disabled, style, ...props }: AppButtonProps) {
+//
+// "large" (52px, full pill) is the primary/secondary action button from
+// the design ("Add your first find", "Save to board", ...). "small" is
+// the compact pill used for header actions ("New", "Edit", "Add").
+export function AppButton({
+  title,
+  variant = 'primary',
+  size = 'large',
+  loading = false,
+  disabled,
+  style,
+  ...props
+}: AppButtonProps) {
   const isDisabled = disabled || loading;
   const scale = useSharedValue(1);
 
@@ -36,11 +50,16 @@ export function AppButton({ title, variant = 'primary', loading = false, disable
       }}
       {...props}
     >
-      <Animated.View style={[styles.base, styles[variant], isDisabled && styles.disabled, animatedStyle, style]}>
+      <Animated.View
+        style={[styles.base, styles[size], styles[variant], isDisabled && styles.disabled, animatedStyle, style]}
+      >
         {loading ? (
-          <ActivityIndicator color={variant === 'primary' ? theme.colors.primaryText : theme.colors.primary} />
+          <ActivityIndicator color={variant === 'primary' ? theme.colors.primaryText : theme.colors.ink} />
         ) : (
-          <AppText variant="label" style={variant === 'primary' ? styles.primaryText : styles.defaultText}>
+          <AppText
+            variant={size === 'large' ? 'buttonLabel' : 'filterChip'}
+            style={variant === 'primary' ? styles.primaryText : styles.defaultText}
+          >
             {title}
           </AppText>
         )}
@@ -51,20 +70,26 @@ export function AppButton({ title, variant = 'primary', loading = false, disable
 
 const styles = StyleSheet.create({
   base: {
-    minHeight: 44,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: theme.radii.md,
-    paddingVertical: theme.spacing.sm + 2,
+    borderRadius: theme.radii.full,
+  },
+  large: {
+    minHeight: 52,
     paddingHorizontal: theme.spacing.lg,
   },
+  small: {
+    minHeight: 36,
+    paddingVertical: 9,
+    paddingHorizontal: 14,
+    flexDirection: 'row',
+    gap: 6,
+  },
   primary: {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: theme.colors.ink,
   },
   secondary: {
-    backgroundColor: theme.colors.surface,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.tile,
   },
   ghost: {
     backgroundColor: 'transparent',
@@ -76,6 +101,6 @@ const styles = StyleSheet.create({
     color: theme.colors.primaryText,
   },
   defaultText: {
-    color: theme.colors.text,
+    color: theme.colors.ink,
   },
 });

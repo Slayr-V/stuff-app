@@ -1,6 +1,6 @@
 import type { PropsWithChildren } from 'react';
 import { ScrollView, StyleSheet, View, type ViewStyle } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
 
 import { theme } from './theme';
 
@@ -8,22 +8,37 @@ export type ScreenContainerProps = PropsWithChildren<{
   scroll?: boolean;
   style?: ViewStyle;
   contentContainerStyle?: ViewStyle;
+  edges?: Edge[];
+  backgroundColor?: string;
+  padded?: boolean;
 }>;
 
-// Standard screen wrapper: safe-area aware, consistent background and
-// padding. Use this instead of a raw View at the root of a screen.
+// Standard screen wrapper: safe-area aware, consistent background.
 //
-// Only bottom/left/right edges are safe-area-inset — every current screen
-// sits under a navigator header, which already accounts for the top
-// inset. A screen presented without a header would need `edges` exposed
-// here to include 'top'.
-export function ScreenContainer({ children, scroll = false, style, contentContainerStyle }: ScreenContainerProps) {
+// `edges` defaults to all four — most screens (the 4 tabs, sheets, forms)
+// have no native header now (they build their own in-content header) so
+// they need the top inset too. Screens that go edge-to-edge under the
+// status bar (Product Detail, Board Detail — the image header extends
+// behind it, with a manually-positioned back button) should pass
+// `edges={['bottom', 'left', 'right']}` or `[]` and handle top spacing
+// themselves with useSafeAreaInsets().
+export function ScreenContainer({
+  children,
+  scroll = false,
+  style,
+  contentContainerStyle,
+  edges = ['top', 'bottom', 'left', 'right'],
+  backgroundColor = theme.colors.background,
+  padded = true,
+}: ScreenContainerProps) {
+  const contentStyle = padded ? styles.content : undefined;
+
   return (
-    <SafeAreaView style={[styles.safeArea, style]} edges={['bottom', 'left', 'right']}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor }, style]} edges={edges}>
       {scroll ? (
-        <ScrollView contentContainerStyle={[styles.content, contentContainerStyle]}>{children}</ScrollView>
+        <ScrollView contentContainerStyle={[contentStyle, contentContainerStyle]}>{children}</ScrollView>
       ) : (
-        <View style={[styles.content, styles.flex, contentContainerStyle]}>{children}</View>
+        <View style={[contentStyle, styles.flex, contentContainerStyle]}>{children}</View>
       )}
     </SafeAreaView>
   );
@@ -32,10 +47,9 @@ export function ScreenContainer({ children, scroll = false, style, contentContai
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: theme.colors.background,
   },
   content: {
-    padding: theme.spacing.md,
+    paddingHorizontal: theme.spacing.gutter,
   },
   flex: {
     flex: 1,

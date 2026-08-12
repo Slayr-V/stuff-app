@@ -88,7 +88,15 @@ export type Database = {
         Row: Product;
         Insert: Pick<Product, 'find_id' | 'user_id' | 'name'> & Partial<Omit<Product, 'find_id' | 'user_id' | 'name'>>;
         Update: Partial<Omit<Product, 'id' | 'find_id' | 'user_id'>>;
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: 'products_find_id_fkey';
+            columns: ['find_id'];
+            isOneToOne: false;
+            referencedRelation: 'finds';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       boards: {
         Row: Board;
@@ -100,7 +108,22 @@ export type Database = {
         Row: BoardProduct;
         Insert: Pick<BoardProduct, 'board_id' | 'product_id'> & Partial<Omit<BoardProduct, 'board_id' | 'product_id'>>;
         Update: Partial<Omit<BoardProduct, 'board_id' | 'product_id'>>;
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: 'board_products_board_id_fkey';
+            columns: ['board_id'];
+            isOneToOne: false;
+            referencedRelation: 'boards';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'board_products_product_id_fkey';
+            columns: ['product_id'];
+            isOneToOne: false;
+            referencedRelation: 'products';
+            referencedColumns: ['id'];
+          },
+        ];
       };
     };
     // No views or functions yet — both required by supabase-js's

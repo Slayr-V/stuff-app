@@ -2,7 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
 
-import { AppButton, AppText, Input, LoadingIndicator, ScreenContainer, theme } from '@/components';
+import { AppButton, AppText, BottomSheet, Input, LoadingIndicator, theme } from '@/components';
 import { getBoard, renameBoard } from '@/services/boards';
 
 export default function RenameBoardScreen() {
@@ -46,45 +46,33 @@ export default function RenameBoardScreen() {
     }
   }
 
-  if (loading) {
-    return (
-      <ScreenContainer contentContainerStyle={styles.center}>
-        <LoadingIndicator />
-      </ScreenContainer>
-    );
-  }
-
   return (
-    <ScreenContainer contentContainerStyle={styles.container}>
-      <Input
-        label="Board name"
-        value={name}
-        onChangeText={setName}
-        autoFocus
-        autoCapitalize="words"
-        returnKeyType="done"
-        onSubmitEditing={handleSave}
-      />
-      {error ? (
-        <AppText variant="caption" style={styles.error}>
-          {error}
-        </AppText>
-      ) : null}
-      <AppButton title="Save" onPress={handleSave} loading={submitting} disabled={!name.trim()} />
-    </ScreenContainer>
+    <BottomSheet title="Rename Board">
+      {loading ? (
+        <LoadingIndicator />
+      ) : (
+        <>
+          <Input
+            value={name}
+            onChangeText={setName}
+            autoFocus
+            autoCapitalize="words"
+            returnKeyType="done"
+            onSubmitEditing={handleSave}
+          />
+          {error ? (
+            <AppText variant="caption" style={styles.error}>
+              {error}
+            </AppText>
+          ) : null}
+          <AppButton title="Save" onPress={handleSave} loading={submitting} disabled={!name.trim()} />
+        </>
+      )}
+    </BottomSheet>
   );
 }
 
 const styles = StyleSheet.create({
-  center: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  container: {
-    gap: theme.spacing.md,
-    justifyContent: 'center',
-    flexGrow: 1,
-  },
   error: {
     color: theme.colors.danger,
   },

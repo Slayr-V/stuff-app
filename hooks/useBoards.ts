@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { listBoards } from '@/services/boards';
+import { listBoardProductCounts, listBoards } from '@/services/boards';
 import type { Board } from '@/types/database';
 
+export type BoardWithCount = Board & { itemCount: number };
+
 export function useBoards() {
-  const [boards, setBoards] = useState<Board[]>([]);
+  const [boards, setBoards] = useState<BoardWithCount[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -12,7 +14,8 @@ export function useBoards() {
     setLoading(true);
     setError(null);
     try {
-      setBoards(await listBoards());
+      const [boardRows, counts] = await Promise.all([listBoards(), listBoardProductCounts()]);
+      setBoards(boardRows.map((board) => ({ ...board, itemCount: counts[board.id] ?? 0 })));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not load Boards.');
     } finally {
