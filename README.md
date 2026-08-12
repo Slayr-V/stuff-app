@@ -58,14 +58,41 @@ Primary structure is a tab navigator: **Finds | Boards | + | Search | Profile**.
   `app/(tabs)/_layout.tsx` and pushes `app/import.tsx`, presented as a
   modal over the tabs — that's where manual import will live.
 
+## Design system
+
+`components/` holds the UI foundations every screen is built on:
+
+| Component         | Purpose                                              |
+| ------------------ | ----------------------------------------------------- |
+| `theme`             | Design tokens: `colors`, `spacing`, `radii`, `typography` |
+| `AppText`           | Typography — `variant`: heading/title/body/label/subtitle/caption |
+| `AppButton`         | Buttons — `variant`: primary/secondary/ghost, plus `loading`/`disabled` |
+| `Input`             | Labeled text input with an `error` state              |
+| `Card`              | Generic surface container                             |
+| `Icon`              | Wraps `@expo/vector-icons` so screens don't depend on that package directly |
+| `LoadingIndicator`  | Spinner with an optional label                        |
+| `ScreenContainer`   | Safe-area-aware screen root with consistent background/padding |
+
+Import from the barrel: `import { AppText, ScreenContainer } from '@/components'`.
+
+Every screen (`app/(tabs)/*`, `app/import.tsx`) is built on these — there
+are no raw `View`/`Text` screen roots or hardcoded colors left in `app/`.
+`Card`, `Input` and `LoadingIndicator` don't have a real call site yet
+(no list or form exists to put them in); they're built and type-checked,
+not yet proven in a screen — that happens naturally in the stages that
+need them (Boards, Authentication, any async request).
+
+No dark mode yet — not asked for — but because screens read colors from
+`theme` rather than hardcoding hex values, adding it later is a token
+change, not a rewrite.
+
 ## Project structure
 
 ```
 app/            Expo Router routes (screens, layouts). File-based — the
                 folder structure here is the navigation structure.
-components/     Small, generic, reusable UI building blocks with no
-                feature-specific logic (e.g. a Button, Card). Populated in
-                the Design System stage.
+components/     Reusable UI building blocks with no feature-specific
+                logic — the design system. See "Design system" above.
 features/       Feature-specific code grouped by domain (finds, boards,
                 products, ...), each owning its own components/hooks/logic.
                 Populated once a feature has real logic to hold, starting

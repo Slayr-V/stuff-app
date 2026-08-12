@@ -1,6 +1,6 @@
-import { Ionicons } from '@expo/vector-icons';
 import { Tabs, useRouter } from 'expo-router';
 
+import { Icon, theme } from '@/components';
 import { APP_NAME } from '@/constants/app';
 
 // Primary navigation: Finds | Boards | + | Search | Profile.
@@ -13,8 +13,8 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: true,
-        tabBarActiveTintColor: '#111827',
-        tabBarInactiveTintColor: '#9CA3AF',
+        tabBarActiveTintColor: theme.colors.text,
+        tabBarInactiveTintColor: theme.colors.textMuted,
       }}
     >
       <Tabs.Screen
@@ -22,21 +22,21 @@ export default function TabsLayout() {
         options={{
           title: APP_NAME,
           tabBarLabel: 'Finds',
-          tabBarIcon: ({ color, size }) => <Ionicons name="albums-outline" size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => <Icon name="albums-outline" size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="boards"
         options={{
           title: 'Boards',
-          tabBarIcon: ({ color, size }) => <Ionicons name="bookmark-outline" size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => <Icon name="bookmark-outline" size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="import"
         options={{
           title: 'Import',
-          tabBarIcon: ({ color, size }) => <Ionicons name="add-circle" size={size + 10} color={color} />,
+          tabBarIcon: ({ color, size }) => <Icon name="add-circle" size={size + 10} color={color} />,
         }}
         listeners={{
           tabPress: (event) => {
@@ -52,14 +52,14 @@ export default function TabsLayout() {
         name="search"
         options={{
           title: 'Search',
-          tabBarIcon: ({ color, size }) => <Ionicons name="search-outline" size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => <Icon name="search-outline" size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ color, size }) => <Ionicons name="person-outline" size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => <Icon name="person-outline" size={size} color={color} />,
         }}
       />
     </Tabs>
