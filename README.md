@@ -15,7 +15,7 @@ alongside the app.
 
 - [Expo](https://expo.dev) (React Native) + TypeScript
 - [Expo Router](https://docs.expo.dev/router/introduction/) for navigation
-- Supabase (Postgres, Auth, Storage, Edge Functions) — added in a later stage
+- [Supabase](https://supabase.com) (Postgres, Auth, Storage, Edge Functions) — client connected; schema/auth land in later stages
 - RevenueCat for subscriptions — added in a later stage
 
 ## Getting started
@@ -48,6 +48,29 @@ variables must be prefixed `EXPO_PUBLIC_`. Secrets (AI provider keys,
 Supabase service-role keys, etc.) never live in the mobile app — they stay
 server-side in Supabase Edge Functions.
 
+`EXPO_PUBLIC_SUPABASE_URL` / `EXPO_PUBLIC_SUPABASE_ANON_KEY` come from your
+**development** Supabase project (Settings → API in the dashboard). The
+anon key is meant to be public — it's only usable through tables protected
+by Row Level Security. Restart `expo start` after editing `.env`.
+
+## Supabase
+
+`services/supabase.ts` creates the Supabase client (`@supabase/supabase-js`
++ AsyncStorage for session persistence). If `EXPO_PUBLIC_SUPABASE_URL` /
+`_ANON_KEY` aren't set, the client still initializes (against a placeholder
+URL) rather than crashing the app — `isSupabaseConfigured` tells callers
+whether it's actually usable.
+
+`hooks/useSupabaseConnection.ts` pings the project's public Auth health
+endpoint to confirm the app is actually reaching your Supabase project —
+this works ahead of any schema or authenticated call existing. Its result
+is surfaced on the **Profile** tab as a small dev-only status card
+(connected / not configured / error), which goes away once Profile shows
+a real signed-in account.
+
+No schema, no auth flows, and no Row Level Security policies exist yet —
+those are the Authentication and Initial Database Schema stages.
+
 ## Navigation
 
 Primary structure is a tab navigator: **Finds | Boards | + | Search | Profile**.
@@ -77,10 +100,9 @@ Import from the barrel: `import { AppText, ScreenContainer } from '@/components'
 
 Every screen (`app/(tabs)/*`, `app/import.tsx`) is built on these — there
 are no raw `View`/`Text` screen roots or hardcoded colors left in `app/`.
-`Card`, `Input` and `LoadingIndicator` don't have a real call site yet
-(no list or form exists to put them in); they're built and type-checked,
-not yet proven in a screen — that happens naturally in the stages that
-need them (Boards, Authentication, any async request).
+`Card` and `LoadingIndicator` are now proven in the Profile tab's Supabase
+status card. `Input` still has no real call site (no form exists yet); it
+gets one in the Authentication stage.
 
 No dark mode yet — not asked for — but because screens read colors from
 `theme` rather than hardcoding hex values, adding it later is a token
