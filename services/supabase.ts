@@ -4,6 +4,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
 import { AppState } from 'react-native';
 
+import type { Database } from '@/types/database';
+
 // Development Supabase project only — see .env.example. Production
 // configuration is a separate project, wired up in the Production
 // Preparation stage, never hardcoded here.
@@ -30,7 +32,7 @@ if (!isSupabaseConfigured && __DEV__) {
 // Callers that care whether Supabase is actually usable should check
 // `isSupabaseConfigured` (or use `useSupabaseConnection`) rather than
 // assume this client is live.
-export const supabase = createClient(
+export const supabase = createClient<Database>(
   supabaseUrl || 'https://placeholder.supabase.co',
   supabaseAnonKey || 'placeholder-anon-key',
   {

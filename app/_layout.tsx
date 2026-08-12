@@ -23,6 +23,29 @@ export default function RootLayout() {
                 title: 'Import',
               }}
             />
+            <Stack.Screen
+              name="boards/new"
+              options={{
+                presentation: 'modal',
+                headerShown: true,
+                title: 'New Board',
+              }}
+            />
+            <Stack.Screen
+              name="boards/[id]/index"
+              options={{
+                headerShown: true,
+                title: 'Board',
+              }}
+            />
+            <Stack.Screen
+              name="boards/[id]/rename"
+              options={{
+                presentation: 'modal',
+                headerShown: true,
+                title: 'Rename Board',
+              }}
+            />
           </Stack>
         </SafeAreaProvider>
       </AuthProvider>

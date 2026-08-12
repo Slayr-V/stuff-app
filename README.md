@@ -99,16 +99,41 @@ Real Supabase email/password auth — not mocked:
   signed out, account email + sign-out when signed in.
 
 Not yet done: Sign in with Apple / Google (need a Development Build —
-native modules Expo Go can't run), password reset, and route-gating other
-tabs by auth state (nothing to gate yet — that lands with real per-user
-data in the Database Schema / Core Stuff Library stages).
+native modules Expo Go can't run), password reset.
+
+## Boards
+
+Real, fully wired to the schema from Stage 7 — nothing mocked:
+
+- `services/boards.ts` — `listBoards`, `getBoard`, `createBoard`,
+  `renameBoard`, `deleteBoard`. Typed end to end via `supabase.from(...)`
+  against `types/database.ts`'s `Database` generic (see below).
+- `hooks/useBoards.ts` — fetch + loading/error state + `refresh()`.
+- **Boards** tab: sign-in gate (Boards are private), loading state, error
+  state with retry, empty state, and a real 2-column grid once you have
+  Boards. Refetches on tab focus (`useFocusEffect`) rather than needing
+  manual refresh signaling.
+- `app/boards/new.tsx` — create modal.
+- `app/boards/[id]/index.tsx` — detail screen (empty product list for
+  now — no products exist until the Import pipeline lands), Rename and
+  Delete actions.
+- `app/boards/[id]/rename.tsx` — rename modal.
+
+Duplicate board names (per user, case-insensitive) are rejected by the
+database's unique constraint; the UI catches that specific Postgres error
+code and shows "You already have a Board with that name" rather than a
+raw database error.
+
+`supabase.ts`'s client is `createClient<Database>(...)` — Supabase calls
+are type-checked against the real schema (row shape, insertable/updatable
+columns), not `any`.
 
 ## Navigation
 
 Primary structure is a tab navigator: **Finds | Boards | + | Search | Profile**.
 
-- `app/(tabs)/` — the four real tabs (Finds, Boards, Search, Profile), each
-  currently a placeholder empty-state screen.
+- `app/(tabs)/` — Finds and Search are still placeholder empty states;
+  Boards and Profile are real (see their sections above).
 - The **+** tab is an action, not a screen: it's intercepted in
   `app/(tabs)/_layout.tsx` and pushes `app/import.tsx`, presented as a
   modal over the tabs — that's where manual import will live.

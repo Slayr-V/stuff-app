@@ -65,3 +65,48 @@ export type BoardProduct = {
   product_id: string;
   created_at: string;
 };
+
+// Shape supabase-js's createClient<Database>() expects, so
+// `supabase.from('boards')` etc. are typed end to end (row shape,
+// insertable columns, updatable columns) instead of `any`.
+export type Database = {
+  public: {
+    Tables: {
+      profiles: {
+        Row: Profile;
+        Insert: Pick<Profile, 'id'> & Partial<Omit<Profile, 'id'>>;
+        Update: Partial<Omit<Profile, 'id'>>;
+        Relationships: [];
+      };
+      finds: {
+        Row: Find;
+        Insert: Pick<Find, 'user_id' | 'platform'> & Partial<Omit<Find, 'user_id' | 'platform'>>;
+        Update: Partial<Omit<Find, 'id' | 'user_id'>>;
+        Relationships: [];
+      };
+      products: {
+        Row: Product;
+        Insert: Pick<Product, 'find_id' | 'user_id' | 'name'> & Partial<Omit<Product, 'find_id' | 'user_id' | 'name'>>;
+        Update: Partial<Omit<Product, 'id' | 'find_id' | 'user_id'>>;
+        Relationships: [];
+      };
+      boards: {
+        Row: Board;
+        Insert: Pick<Board, 'user_id' | 'name'> & Partial<Omit<Board, 'user_id' | 'name'>>;
+        Update: Partial<Omit<Board, 'id' | 'user_id'>>;
+        Relationships: [];
+      };
+      board_products: {
+        Row: BoardProduct;
+        Insert: Pick<BoardProduct, 'board_id' | 'product_id'> & Partial<Omit<BoardProduct, 'board_id' | 'product_id'>>;
+        Update: Partial<Omit<BoardProduct, 'board_id' | 'product_id'>>;
+        Relationships: [];
+      };
+    };
+    // No views or functions yet — both required by supabase-js's
+    // GenericSchema constraint even when empty. Omitting them entirely
+    // silently falls back to `any` internally, which is worse than this.
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
+  };
+};
