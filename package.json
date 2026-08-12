@@ -4,6 +4,7 @@
   "main": "expo-router/entry",
   "dependencies": {
     "@expo/metro-runtime": "^57.0.9",
+    "@expo/vector-icons": "^15.1.1",
     "expo": "~57.0.12",
     "expo-constants": "^57.0.10",
     "expo-linking": "^57.0.5",

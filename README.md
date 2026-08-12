@@ -48,6 +48,16 @@ variables must be prefixed `EXPO_PUBLIC_`. Secrets (AI provider keys,
 Supabase service-role keys, etc.) never live in the mobile app — they stay
 server-side in Supabase Edge Functions.
 
+## Navigation
+
+Primary structure is a tab navigator: **Finds | Boards | + | Search | Profile**.
+
+- `app/(tabs)/` — the four real tabs (Finds, Boards, Search, Profile), each
+  currently a placeholder empty-state screen.
+- The **+** tab is an action, not a screen: it's intercepted in
+  `app/(tabs)/_layout.tsx` and pushes `app/import.tsx`, presented as a
+  modal over the tabs — that's where manual import will live.
+
 ## Project structure
 
 ```

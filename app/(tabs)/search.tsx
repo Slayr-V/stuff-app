@@ -1,15 +1,12 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-import { APP_NAME, APP_TAGLINE } from '@/constants/app';
-
-// Temporary placeholder screen for Stage 1 (Project Setup).
-// Real navigation (Finds | Boards | + | Search | Profile) and UI
-// foundations are built in later stages.
-export default function HomeScreen() {
+// Placeholder Search screen. Real library search (product, brand,
+// category, Board, creator, source platform) is built in the Search stage.
+export default function SearchScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{APP_NAME}</Text>
-      <Text style={styles.subtitle}>{APP_TAGLINE}</Text>
+      <Text style={styles.title}>Search</Text>
+      <Text style={styles.subtitle}>Search your saved products, brands and Boards.</Text>
     </View>
   );
 }
@@ -24,11 +21,11 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   title: {
-    fontSize: 32,
+    fontSize: 20,
     fontWeight: '700',
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#666',
     textAlign: 'center',
   },
