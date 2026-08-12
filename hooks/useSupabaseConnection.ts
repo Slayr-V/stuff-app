@@ -10,24 +10,34 @@ export type SupabaseConnectionResult = {
 };
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
-// Genuinely pings the configured Supabase project's public Auth health
-// endpoint (no anon key or schema required, so this works ahead of the
+// Genuinely pings the configured Supabase project's Auth health endpoint
+// (no schema/auth session required, so this works ahead of the
 // Authentication / Database Schema stages) to prove the client is talking
 // to a real, reachable Supabase project — not just that env vars parse.
+//
+// The apikey header is required here: Supabase's gateway rejects every
+// request to the project domain with 401 if it's missing, even for this
+// health check — it's not optional the way "no auth needed" might imply.
 export function useSupabaseConnection(): SupabaseConnectionResult {
   const [status, setStatus] = useState<SupabaseConnectionStatus>(isSupabaseConfigured ? 'checking' : 'not-configured');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     // Nothing to check — the initial state above already reflects this.
-    if (!isSupabaseConfigured || !supabaseUrl) {
+    if (!isSupabaseConfigured || !supabaseUrl || !supabaseAnonKey) {
       return;
     }
 
     let cancelled = false;
 
-    fetch(`${supabaseUrl}/auth/v1/health`)
+    fetch(`${supabaseUrl}/auth/v1/health`, {
+      headers: {
+        apikey: supabaseAnonKey,
+        Authorization: `Bearer ${supabaseAnonKey}`,
+      },
+    })
       .then((response) => {
         if (cancelled) return;
         if (!response.ok) {
