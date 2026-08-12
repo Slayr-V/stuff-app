@@ -71,9 +71,20 @@ reaching your Supabase project. It's no longer surfaced in the UI now
 that real authentication proves connectivity end-to-end, but the hook
 still exists as a standalone diagnostic if needed.
 
-No database schema or Row Level Security policies exist yet — that's the
-Initial Database Schema stage. Auth works without them (Supabase's
-built-in `auth.users` table needs no app schema).
+### Database schema
+
+`supabase/migrations/` has the SQL — see `supabase/README.md` for what's
+in it and how to apply it (no CLI project link yet, so it's currently a
+paste-into-the-SQL-Editor workflow). `profiles`, `finds`, `products`,
+`boards`, `board_products` — every table has Row Level Security enabled,
+and `types/database.ts` mirrors the schema for the app code.
+
+This has been tested against a real (throwaway, local) Postgres instance,
+including adversarially: a second simulated user was confirmed unable to
+read, spoof, overwrite, or link against a first user's data through any
+of the five tables. It has **not** yet been applied to the actual
+development Supabase project — that's a manual step for you to run (see
+`supabase/README.md`).
 
 ## Authentication
 
