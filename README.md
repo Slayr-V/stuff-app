@@ -25,9 +25,12 @@ npm install
 npm run start
 ```
 
-This currently runs fine in Expo Go. Native functionality (e.g. the Share
-Extension for receiving content from other apps) will require moving to an
-Expo Development Build later in the roadmap — see `app.json` / the project
+This currently runs fine in Expo Go. Pinned to **Expo SDK 54** specifically
+so it matches what the published Expo Go app on the App Store supports —
+scan the QR code from `npm run start` with your phone's Camera app (Expo Go
+must be installed). Native functionality (e.g. the Share Extension for
+receiving content from other apps) will require moving to an Expo
+Development Build later in the roadmap — see `app.json` / the project
 context for details.
 
 ### Scripts
