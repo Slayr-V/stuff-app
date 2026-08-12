@@ -1,9 +1,9 @@
-# Aisle
+# Stuff
 
 Turn any social post into a shopping list.
 
-Aisle is a mobile shopping utility: send a post from Instagram, TikTok,
-YouTube, Pinterest, Facebook, or the web to Aisle, and it identifies the
+Stuff is a mobile shopping utility: send a post from Instagram, TikTok,
+YouTube, Pinterest, Facebook, or the web to Stuff, and it identifies the
 products shown, finds places to buy them, and lets you save them into
 Boards for later.
 
@@ -118,7 +118,7 @@ components/     Reusable UI building blocks with no feature-specific
 features/       Feature-specific code grouped by domain (finds, boards,
                 products, ...), each owning its own components/hooks/logic.
                 Populated once a feature has real logic to hold, starting
-                with the Core Aisle Library stage.
+                with the Core Stuff Library stage.
 services/       Integrations and business logic that talk to the outside
                 world — Supabase client, API clients, provider
                 abstractions (ImportService, ProductSearchProvider, ...).

@@ -4,7 +4,7 @@ import { AppText, ScreenContainer } from '@/components';
 import { APP_NAME } from '@/constants/app';
 
 // Placeholder Finds screen. Real Finds (imported content, identified
-// products, confidence, retailer links) are built in the Core Aisle
+// products, confidence, retailer links) are built in the Core Stuff
 // Library and Import System / Product Identification stages.
 export default function FindsScreen() {
   return (

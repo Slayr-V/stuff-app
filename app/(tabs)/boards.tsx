@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 import { AppText, ScreenContainer } from '@/components';
 
 // Placeholder Boards screen. Real Board creation/management and the
-// system "All Saved" collection are built in the Core Aisle Library stage.
+// system "All Saved" collection are built in the Core Stuff Library stage.
 export default function BoardsScreen() {
   return (
     <ScreenContainer contentContainerStyle={styles.center}>
