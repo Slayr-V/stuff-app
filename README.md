@@ -114,9 +114,9 @@ Real, fully wired to the schema from Stage 7 — nothing mocked:
   Boards. Refetches on tab focus (`useFocusEffect`) rather than needing
   manual refresh signaling.
 - `app/boards/new.tsx` — create modal.
-- `app/boards/[id]/index.tsx` — detail screen (empty product list for
-  now — no products exist until the Import pipeline lands), Rename and
-  Delete actions.
+- `app/boards/[id]/index.tsx` — detail screen (Rename and Delete
+  actions; product list is still empty here — saving a *specific*
+  product to a Board isn't wired up yet, see Import below).
 - `app/boards/[id]/rename.tsx` — rename modal.
 
 Duplicate board names (per user, case-insensitive) are rejected by the
@@ -128,15 +128,49 @@ raw database error.
 are type-checked against the real schema (row shape, insertable/updatable
 columns), not `any`.
 
+## Import & AI product extraction
+
+Real end to end — paste content in, AI extraction, an editable draft
+review, then a real save. Nothing here is mocked, but the scope is
+deliberately narrower than the full spec right now:
+
+- **What works**: paste a caption/description (copy-pasted by the user
+  from the post) + an optional source link → `supabase/functions/
+  analyze-find` (OpenAI, structured JSON output) extracts candidate
+  products → you review and edit every field before anything is saved →
+  saving creates a real `finds` row + `products` rows.
+- **What doesn't exist yet**: auto-fetching/scraping the pasted URL
+  (Instagram/TikTok/etc. actively block naive server-side fetches —
+  building that now would mean shipping something that silently fails
+  for most real posts, so it's not built rather than built badly),
+  screenshot import, video import, and saving an individual product to a
+  specific Board from the Find detail screen.
+- Extracted products are saved with `match_type: 'mentioned'` — they
+  came from the creator's own caption text, not a confirmed retailer
+  match, so a stronger classification (`exact_match`/`likely_match`)
+  would be false precision. That's earned later, by Product Search.
+- The Edge Function requires a real signed-in user's JWT (checked inside
+  the function itself, not just a valid API key) — it costs money per
+  call, so anonymous access is a hard no. Verified by actually running
+  the function locally with Deno and confirming: missing auth header →
+  401, invalid session → 401, missing `OPENAI_API_KEY` → 500 with a
+  clear message.
+- **Not yet deployed to your Supabase project** — see
+  `supabase/README.md` for the one-time `supabase functions deploy` +
+  `supabase secrets set OPENAI_API_KEY` steps.
+
 ## Navigation
 
 Primary structure is a tab navigator: **Finds | Boards | + | Search | Profile**.
 
-- `app/(tabs)/` — Finds and Search are still placeholder empty states;
-  Boards and Profile are real (see their sections above).
+- `app/(tabs)/` — Finds, Boards and Profile are real; Search is still a
+  placeholder empty state.
+- Finds tab lists real `finds` (`app/finds/[id]/index.tsx` for detail +
+  products) — see Import & AI product extraction above for how they get
+  there.
 - The **+** tab is an action, not a screen: it's intercepted in
   `app/(tabs)/_layout.tsx` and pushes `app/import.tsx`, presented as a
-  modal over the tabs — that's where manual import will live.
+  modal over the tabs — the real import flow (see above).
 
 ## Design system
 
@@ -155,11 +189,11 @@ Primary structure is a tab navigator: **Finds | Boards | + | Search | Profile**.
 
 Import from the barrel: `import { AppText, ScreenContainer } from '@/components'`.
 
-Every screen (`app/(tabs)/*`, `app/import.tsx`) is built on these — there
-are no raw `View`/`Text` screen roots or hardcoded colors left in `app/`.
-`Input` and `LoadingIndicator` are proven in the Profile tab's real
-sign-in form. `Card` has no call site right now — it'll get one once
-there's a list to put it in (Boards, Search results).
+Every screen (`app/(tabs)/*`, `app/import.tsx`, `app/boards/*`,
+`app/finds/*`) is built on these — there are no raw `View`/`Text` screen
+roots or hardcoded colors left in `app/`. All seven components now have
+real call sites: `Card` (Boards grid, Find products), `Input` (sign-in,
+Board name, Import form), `LoadingIndicator` (every async screen).
 
 No dark mode yet — not asked for — but because screens read colors from
 `theme` rather than hardcoding hex values, adding it later is a token

@@ -46,6 +46,13 @@ export default function RootLayout() {
                 title: 'Rename Board',
               }}
             />
+            <Stack.Screen
+              name="finds/[id]/index"
+              options={{
+                headerShown: true,
+                title: 'Find',
+              }}
+            />
           </Stack>
         </SafeAreaProvider>
       </AuthProvider>

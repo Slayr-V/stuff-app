@@ -1,4 +1,6 @@
-# Database migrations
+# Supabase (database + Edge Functions)
+
+## Database migrations
 
 SQL migrations live in `migrations/`, one file per change, named
 `<timestamp>_<description>.sql`. Never modify a production database
@@ -51,3 +53,51 @@ Deliberately not in this migration yet: `import_jobs`, `source_assets`,
 `product_evidence`, `retail_offers`, `product_feedback`,
 `outbound_clicks`, `usage_events`, `subscriptions` — those belong to
 later stages (Import System, Product Search, RevenueCat, Analytics).
+
+## Edge Functions
+
+`functions/analyze-find/` — takes a pasted caption (+ optional source
+URL) and returns candidate products via OpenAI structured output. Does
+**not** write to the database and does **not** fetch/scrape the source
+URL server-side (Instagram/TikTok etc. block naive scraping — the
+caption is supplied directly by the user instead, which actually works).
+The client shows an editable draft review screen before saving anything
+for real.
+
+### Required secrets
+
+| Secret | Required | Notes |
+|---|---|---|
+| `OPENAI_API_KEY` | Yes | From platform.openai.com. Never commit this — set it as a secret, not an env var in code. |
+| `OPENAI_MODEL` | No | Defaults to a low-cost model in code. Override to change models without redeploying. |
+
+`SUPABASE_URL` / `SUPABASE_ANON_KEY` are auto-injected by the platform —
+don't set those yourself.
+
+### Deploying (not done yet — do this manually)
+
+Requires the Supabase CLI, authenticated and linked to your project:
+
+```bash
+npx supabase login
+npx supabase link --project-ref <your-project-ref>
+npx supabase secrets set OPENAI_API_KEY=sk-...
+npx supabase functions deploy analyze-find
+```
+
+The function requires a real signed-in user's JWT (checked inside the
+function, not just "a valid API key") — it costs money per call, so it
+must never be reachable anonymously.
+
+### Local development / verifying changes
+
+Checked with `deno check` / `deno lint` (not this project's `tsc`/eslint
+— Deno has different globals and module resolution, see
+`eslint.config.js`'s ignore list). To actually run it locally:
+
+```bash
+npx supabase functions serve analyze-find --env-file .env.local
+```
+
+(`.env.local` would hold `OPENAI_API_KEY` for local testing — gitignored,
+same as the app's `.env`.)
