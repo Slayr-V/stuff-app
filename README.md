@@ -51,11 +51,32 @@ server-side in Supabase Edge Functions.
 ## Project structure
 
 ```
-app/            Expo Router routes (screens)
+app/            Expo Router routes (screens, layouts). File-based — the
+                folder structure here is the navigation structure.
+components/     Small, generic, reusable UI building blocks with no
+                feature-specific logic (e.g. a Button, Card). Populated in
+                the Design System stage.
+features/       Feature-specific code grouped by domain (finds, boards,
+                products, ...), each owning its own components/hooks/logic.
+                Populated once a feature has real logic to hold, starting
+                with the Core Aisle Library stage.
+services/       Integrations and business logic that talk to the outside
+                world — Supabase client, API clients, provider
+                abstractions (ImportService, ProductSearchProvider, ...).
+                Populated in the Supabase Integration stage onward.
+hooks/          Shared React hooks not tied to one feature.
+types/          Shared TypeScript types used across the app.
+constants/      Plain app-wide constants (non-visual). Visual design
+                tokens live in components/ once the Design System exists.
+utils/          Small, pure helper functions with no side effects.
 ```
 
-More structure (components, features, services, hooks, types, constants)
-is introduced in the Folder & Code Architecture stage.
+Folders that don't have real content yet keep a `.gitkeep` placeholder so
+the structure exists in git ahead of the stage that fills them in — an
+empty folder is not a claim that the feature works.
+
+Import alias: `@/` maps to the repo root (e.g. `@/constants/app`), configured
+in `tsconfig.json` and `metro.config.js`.
 
 ### App icons
 

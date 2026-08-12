@@ -1,13 +1,15 @@
 import { StyleSheet, Text, View } from 'react-native';
 
+import { APP_NAME, APP_TAGLINE } from '@/constants/app';
+
 // Temporary placeholder screen for Stage 1 (Project Setup).
 // Real navigation (Finds | Boards | + | Search | Profile) and UI
 // foundations are built in later stages.
 export default function HomeScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Aisle</Text>
-      <Text style={styles.subtitle}>Turn any social post into a shopping list.</Text>
+      <Text style={styles.title}>{APP_NAME}</Text>
+      <Text style={styles.subtitle}>{APP_TAGLINE}</Text>
     </View>
   );
 }
