@@ -183,42 +183,57 @@ plus a floating **+** action for Import.
 ## Design system
 
 `components/` holds the UI foundations every screen is built on. Visual
-direction follows the reference UI provided (ReciMe): a warm neutral
-palette, a serif display face for headings against a plain sans body, a
-single blue accent for interactive elements, and a floating action
-button for the primary create action.
+direction follows a design handoff package (high-fidelity mockups + a
+written spec covering every screen, flow, and token) delivered after the
+earlier ReciMe-inspired pass: strictly monochrome (near-black ink on
+white, a handful of light greys for surfaces/tiles/hairlines), the system
+font throughout (no custom typeface), and emphasis driven entirely by
+weight/size/spacing rather than color or a display face.
 
 | Component         | Purpose                                              |
 | ------------------ | ----------------------------------------------------- |
-| `theme`             | Design tokens: `colors`, `spacing`, `radii`, `fontFamily`, `typography` |
-| `AppText`           | Typography — `variant`: heading/title (serif) / body/label/subtitle/caption (sans) |
-| `AppButton`         | Buttons — `variant`: primary/secondary/ghost, `loading`/`disabled`, animated press (Reanimated spring) |
-| `Fab`               | Floating action button — animated press, positioned by the caller |
-| `Input`             | Labeled text input with an `error` state              |
-| `Card`              | Surface container — `variant`: `surface` (default) or `feature` (warm cream, for empty states) |
-| `Icon`              | Wraps `@expo/vector-icons` so screens don't depend on that package directly |
-| `LoadingIndicator`  | Spinner with an optional label                        |
-| `Logo`              | The real Stuff wordmark (`assets/brand/stuff-logo.jpg`), used in the Finds tab header |
-| `ScreenContainer`   | Safe-area-aware screen root with consistent background/padding |
+| `theme`             | Design tokens: `colors`, `spacing`, `radii`, `typography`, `shadows` |
+| `AppText`           | Typography — `variant` selects one of ~20 named roles from the handoff's type scale (screenTitle, sheetTitle, bottomSheetTitle, body, metadata, eyebrow, matchBadge, ...) |
+| `AppButton`         | Buttons — `variant`: primary/secondary/ghost, `size`: large (52px pill) / small (36px compact pill), animated press (Reanimated spring) |
+| `Fab`               | 56×56 black circular floating action button — animated press, positioned by the caller |
+| `Input`             | Labeled text input with an `error` state, filled (no border) style |
+| `Card`              | Flat surface container, no border/shadow by default — separation comes from grey fill against white |
+| `Icon`              | Custom `react-native-svg` icon set (tab icons, chevron, search, share, bookmark, scan, link, describe, ...) transcribed from the handoff — no icon-font dependency |
+| `PlaceholderTile`   | Diagonal-stripe SVG placeholder + monospace caption, used everywhere real imagery (product shots, board covers) doesn't exist yet |
+| `BoardCollage`      | 3-panel image collage (1 large + 2 stacked) used at three sizes across Boards/Board Detail |
+| `BottomSheet`       | Reusable scrim + rounded-top sheet chrome for `transparentModal` routes (New Board, Save to board, Add to stuff) |
+| `Spinner`           | Real rotating ring spinner (Reanimated `withRepeat`), not a static image |
+| `LoadingIndicator`  | `ActivityIndicator` with an optional label, for plain loading states |
+| `Logo`              | The real Stuff wordmark (`assets/brand/stuff-logo.jpg`), cropped via the handoff's exact offset/scale math |
+| `ScreenContainer`   | Safe-area-aware screen root with configurable edges/background/padding |
 
 Import from the barrel: `import { AppText, ScreenContainer } from '@/components'`.
 
 Every screen is built on these — there are no raw `View`/`Text` screen
 roots or hardcoded colors left in `app/`.
 
-**Fonts**: Playfair Display (serif, headings only) loaded via
-`@expo-google-fonts/playfair-display`, imported from its individual
-weight submodules (`.../600SemiBold`, `.../700Bold`) rather than the
-package barrel — the barrel re-exports all 12 weights, which would bundle
-~2.2MB of font files for the 2 actually used. `app/_layout.tsx` gates
-rendering on `useFonts()` and keeps the native splash screen up
-(`expo-splash-screen`) until they're ready, so there's no flash of
-system-font text before the display face swaps in.
+**Fonts**: system font only (no bundled typeface) — the earlier Playfair
+Display serif pass was removed along with `expo-font` /
+`@expo-google-fonts/playfair-display` when this monochrome direction
+superseded it.
 
-**Animation**: list items and empty-state feature cards fade/slide in on
-mount (Reanimated `FadeInDown`, staggered by index for lists); buttons
-and the FAB scale down on press (`withSpring`). All real Reanimated
-usage, not `Animated` API from core React Native.
+**Animation**: list items fade/slide in on mount (Reanimated
+`FadeInDown`, staggered by index); buttons, the FAB, and list rows scale
+down on press (`withSpring`); the analysing checklist and any loading
+state use a real rotating `Spinner`, not a static graphic. All real
+Reanimated usage, not the `Animated` API from core React Native.
+
+**Placeholders, not fake data**: every product shot, board cover, and
+avatar in the design is an image slot this app has no real picture for
+yet (`products.image_url` / `finds.thumbnail_url` aren't populated by any
+current pipeline). Rather than embed stock/generated imagery to match the
+mockup visually, every one of those slots renders `PlaceholderTile` — a
+genuine, honest "there's no image here yet" state with a caption naming
+what belongs there. The same principle drove several screens to diverge
+from the handoff's example content: no fabricated price, retailer link,
+confidence percentage (hidden when `null` rather than shown as 0%), or
+curated/trending Discover content — see "Import flow" and the tab
+sections below for the specific calls made per screen.
 
 **Logo**: `assets/brand/stuff-logo.jpg` is the real wordmark, wired as
 the app icon, splash screen, and web favicon in `app.json`, and shown in
@@ -230,6 +245,37 @@ Preparation.
 No dark mode yet — not asked for — but because screens read colors from
 `theme` rather than hardcoding hex values, adding it later is a token
 change, not a rewrite.
+
+### Import flow
+
+Entered from the FAB (every tab) or the Finds empty state, all screens
+under `app/import/`, state shared via `hooks/useImportDraft.tsx`:
+
+1. **Add to stuff** (`app/import/index.tsx`) — bottom sheet with 4 rows.
+   Only 2 are wired to something real: this app has no share-sheet
+   extension and no camera/object-recognition pipeline, so "Share from an
+   app" and "Scan something" say so honestly instead of silently doing
+   nothing. "Paste a link or screenshot" and "Describe it" both open
+   Describe — the actual capability behind either is identical (caption
+   text + an optional link), so they share one screen with copy framed
+   to match whichever was tapped.
+2. **Describe** (`app/import/describe.tsx`) — caption + optional source
+   link, saved into the shared draft.
+3. **Analysing** (`app/import/analyzing.tsx`) — a real `analyzeFind()`
+   call in flight, not a fixed timer. The 3-step checklist reflects real
+   request state (instant/spinner/done), matching the handoff's own
+   instruction to drive this from the edge function's status in
+   production.
+4. **Results** (`app/import/results.tsx`) — the real extracted products,
+   each tagged `match_type: 'mentioned'` (they came from caption text,
+   not a confirmed retailer match) with a lightweight include/exclude
+   toggle rather than the handoff's per-item board-picker — assigning a
+   board only makes sense once the product row exists to attach to,
+   which happens after Save.
+5. **Save to board** (`app/board-picker.tsx`) — from Product Detail,
+   lists real boards with real item counts.
+6. **Toast** (`hooks/useToast.tsx`) — real black toast with Undo, shown
+   after saving to a board.
 
 ## Project structure
 
@@ -255,7 +301,10 @@ utils/          Small, pure helper functions with no side effects.
 
 Folders that don't have real content yet keep a `.gitkeep` placeholder so
 the structure exists in git ahead of the stage that fills them in — an
-empty folder is not a claim that the feature works.
+empty folder is not a claim that the feature works. `utils/` lost its
+placeholder once `formatRelativeTime.ts` gave it real content;
+`features/` still carries theirs (`constants/` already had real content
+from an earlier stage).
 
 Import alias: `@/` maps to the repo root (e.g. `@/constants/app`), configured
 in `tsconfig.json` and `metro.config.js`.
