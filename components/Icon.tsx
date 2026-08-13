@@ -17,7 +17,9 @@ export type IconName =
   | 'checkmark'
   | 'scan'
   | 'link'
-  | 'describe';
+  | 'describe'
+  | 'appleLogo'
+  | 'googleLogo';
 
 export type IconProps = {
   name: IconName;
@@ -174,6 +176,43 @@ export function Icon({ name, size = 24, color = theme.colors.ink, strokeWidth }:
             stroke={color}
             strokeWidth={strokeWidth ?? 1.5}
             strokeLinejoin="round"
+          />
+        </Svg>
+      );
+    case 'appleLogo':
+      return (
+        <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+          <Path
+            fill={color}
+            d="M17.05 12.54c.02-2.3 1.87-3.4 1.95-3.45-1.06-1.56-2.72-1.77-3.3-1.8-1.4-.11-2.73.82-3.44.82-.72 0-1.81-.8-2.98-.78-1.53.02-2.94.89-3.73 2.26-1.59 2.76-.41 6.85 1.14 9.1.76 1.1 1.67 2.33 2.86 2.29 1.15-.05 1.58-.74 2.96-.74 1.37 0 1.77.74 2.97.72 1.23-.02 2.02-1.12 2.78-2.23.87-1.28 1.23-2.52 1.25-2.58-.03-.01-2.4-.92-2.42-3.63M14.86 5.4c.62-.76 1.04-1.8.92-2.85-.9.04-2 .6-2.65 1.35-.58.67-1.08 1.74-.95 2.76 1 .08 2.03-.51 2.68-1.26"
+          />
+        </Svg>
+      );
+    case 'googleLogo':
+      // Kept monochrome (opacity tiers of the same ink color) rather than
+      // Google's brand colors, matching the design's pure black/white
+      // system — the same 4-path "G" shape, no color swatches added.
+      return (
+        <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+          <Path
+            fill={color}
+            opacity={0.9}
+            d="M21.6 12.2c0-.7-.06-1.36-.18-2H12v3.8h5.38a4.6 4.6 0 01-2 3.02v2.5h3.23c1.89-1.74 2.99-4.3 2.99-7.32z"
+          />
+          <Path
+            fill={color}
+            opacity={0.7}
+            d="M12 22c2.7 0 4.96-.9 6.61-2.43l-3.23-2.5c-.9.6-2.05.96-3.38.96-2.6 0-4.8-1.75-5.59-4.1H3.06v2.6A9.99 9.99 0 0012 22z"
+          />
+          <Path
+            fill={color}
+            opacity={0.5}
+            d="M6.41 13.93a6 6 0 010-3.85V7.48H3.06a10 10 0 000 9.04l3.35-2.59z"
+          />
+          <Path
+            fill={color}
+            opacity={0.8}
+            d="M12 5.98c1.47 0 2.79.5 3.83 1.5l2.86-2.86A9.9 9.9 0 0012 2 9.99 9.99 0 003.06 7.48l3.35 2.6C7.2 7.73 9.4 5.98 12 5.98z"
           />
         </Svg>
       );

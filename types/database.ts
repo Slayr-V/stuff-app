@@ -22,6 +22,12 @@ export type Profile = {
   email: string | null;
   display_name: string | null;
   created_at: string;
+  // Populated by the onboarding quiz (app/onboarding/index.tsx) once a
+  // real session exists to write to — null for anyone who signed in
+  // without taking it (the welcome screen's "I already have an account"
+  // shortcut) rather than defaulted to something fake.
+  onboarding_answers: Record<string, string[]> | null;
+  onboarding_completed_at: string | null;
 };
 
 export type Find = {

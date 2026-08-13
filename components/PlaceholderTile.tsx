@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { StyleSheet, View, type ViewStyle } from 'react-native';
+import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import Svg, { Defs, Pattern, Rect } from 'react-native-svg';
 
 import { AppText } from './AppText';
@@ -12,7 +12,11 @@ export type PlaceholderTileProps = {
   captionPosition?: 'bottom-left' | 'top-left';
   radius?: number;
   backgroundColor?: string;
-  style?: ViewStyle;
+  // Dark stripe on a light tile by default. The onboarding welcome
+  // screen's hero panels sit on a near-black background, where that
+  // stripe would be invisible — pass a light rgba there instead.
+  stripeColor?: string;
+  style?: StyleProp<ViewStyle>;
 };
 
 // Every product shot, board cover, brand avatar and editorial image in
@@ -27,6 +31,7 @@ export function PlaceholderTile({
   captionPosition = 'bottom-left',
   radius = theme.radii.tile,
   backgroundColor = theme.colors.tile,
+  stripeColor = 'rgba(10,10,10,0.035)',
   style,
 }: PlaceholderTileProps) {
   const idRef = useRef<string | null>(null);
@@ -42,7 +47,7 @@ export function PlaceholderTile({
         <Defs>
           <Pattern id={id} patternUnits="userSpaceOnUse" width={13} height={13} patternTransform="rotate(135)">
             <Rect width={13} height={13} fill={backgroundColor} />
-            <Rect width={6} height={13} fill="rgba(10,10,10,0.035)" />
+            <Rect width={6} height={13} fill={stripeColor} />
           </Pattern>
         </Defs>
         <Rect width="100%" height="100%" fill={`url(#${id})`} />
