@@ -1,23 +1,24 @@
 {
   "expo": {
-    "name": "Stuff",
-    "slug": "stuff-app",
-    "scheme": "stuff",
+    "name": "Cabana",
+    "slug": "cabana-app",
+    "scheme": "cabana",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
-    "icon": "./assets/brand/stuff-logo.jpg",
+    "icon": "./assets/brand/cabana-logo.jpeg",
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/brand/stuff-logo.jpg",
-          "imageWidth": 220,
+          "image": "./assets/brand/cabana-logo.jpeg",
+          "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#FFFFFF"
+          "backgroundColor": "#AFB7F7"
         }
-      ]
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true
@@ -29,7 +30,7 @@
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/brand/stuff-logo.jpg"
+      "favicon": "./assets/brand/cabana-logo.jpeg"
     }
   }
 }
